@@ -10,11 +10,11 @@ import (
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/mux"
-	"golang.org/x/crypto/bcrypt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var client *mongo.Client
@@ -95,9 +95,12 @@ func login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var user User
-	err = collection.FindOne(context.TODO(), bson.M{"email": creds.Username}).Decode(&user)
-	if err != nil {
+	err = collection.FindOne(context.TODO(), bson.M{"username": creds.Username}).Decode(&user)
+	if err == mongo.ErrNoDocuments {
 		http.Error(w, "Invalid username or password", http.StatusUnauthorized)
+		return
+	} else if err != nil {
+		http.Error(w, "Error fetching user", http.StatusInternalServerError)
 		return
 	}
 
