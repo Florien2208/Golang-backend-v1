@@ -1,0 +1,163 @@
+openapi: 3.0.0
+info:
+  title: User Management API
+  version: 1.0.0
+  description: API for managing users, including creating, updating, deleting, and fetching users, as well as user login.
+servers:
+  - url: http://localhost:8000
+    description: Local server
+
+paths:
+  /api/users:
+    post:
+      summary: Create a new user
+      requestBody:
+        description: User object that needs to be added
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '500':
+          description: Error hashing password or inserting user into the database
+
+    get:
+      summary: Get all users
+      responses:
+        '200':
+          description: A list of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '500':
+          description: Error fetching users from the database
+
+  /api/users/{id}:
+    get:
+      summary: Get a user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: objectid
+      responses:
+        '200':
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+
+    put:
+      summary: Update a user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: objectid
+      requestBody:
+        description: Updated user object
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '500':
+          description: Error updating the user in the database
+
+    delete:
+      summary: Delete a user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: objectid
+      responses:
+        '200':
+          description: User deleted successfully
+          content:
+            application/json:
+              schema:
+                type: string
+                example: User deleted
+        '500':
+          description: Error deleting the user from the database
+
+  /api/login:
+    post:
+      summary: Log in a user
+      requestBody:
+        description: Credentials to authenticate the user
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Credentials'
+      responses:
+        '200':
+          description: Successful login and token generation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        '401':
+          description: Invalid username or password
+        '500':
+          description: Error generating token
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: objectid
+        username:
+          type: string
+          example: "john_doe"
+        email:
+          type: string
+          example: "john.doe@example.com"
+        password:
+          type: string
+          example: "$2a$14$E2Nfn8Q0r9riAf2OxHrEiOg8A4jThk3G0k4Z9q"
+
+    Credentials:
+      type: object
+      properties:
+        username:
+          type: string
+          example: "john_doe"
+        password:
+          type: string
+          example: "mypassword123"
